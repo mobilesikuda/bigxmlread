@@ -1,55 +1,101 @@
 import sys
-from PySide6.QtGui import QIcon, QAction
+
+from PySide6.QtCore import (QByteArray, QFile, QFileInfo, QSaveFile, QSettings,
+                            QTextStream, Qt, Slot, QXmlStreamReader, QDir)
+from PySide6.QtGui import QIcon, QAction, QKeySequence
 from PySide6.QtWidgets import (QApplication, QFileDialog, QMainWindow,
-                               QMessageBox, QTextEdit)
+                               QMessageBox, QTextEdit, QWidget, QVBoxLayout, QTreeWidget)
+from bigxmlwidget import BigXmlWidget
+
 
 class MainWindow(QMainWindow):
     
     def __init__(self):
         super().__init__()
 
-        #labels = list( self.tr("Node/Attribute"), self.tr("Value"))
+        self.centralwidget = QWidget(self)
+        self.verticalLayout = QVBoxLayout(self.centralwidget)
+        self.treeWidget = BigXmlWidget(self.centralwidget)
+        self.verticalLayout.addWidget(self.treeWidget)
+        self.setCentralWidget(self.centralwidget)
 
-        #bigxmlWidget: BigXmlReader 
-
-        #bigxmlWidget.header()->setSectionResizeMode(QHeaderView::ResizeToContents);
-        #bigxmlWidget.setHeaderLabels(labels);
-        #setCentralWidget(&bigxmlWidget);
-
-        #createActions();
-
-        #Menu
-        button_action = QAction(QIcon("bug.png"), "&Your button", self)
-        button_action.setStatusTip("This is your button")
-        #button_action.triggered.connect(self.toolbar_button_clicked)
-        button_action.setCheckable(True)
-        #toolbar.addAction(button_action)
-
-        menu = self.menuBar()
-        file_menu = menu.addMenu("&File")
-        file_menu.addAction(button_action)
+        self.create_actions()
+        self.create_menus()
         self.statusBar().showMessage(self.tr("Ready"));
+        self.setWindowTitle(self.tr("BigXmlReader"))
+        self.resize(480, 320)
 
-        self.setWindowTitle(self.tr("BigXmlReader"));
-        self.resize(480, 320);
-    
-    #def createMenus(self):
- 
-        # fileMenu = self.menuBar().addMenu(self.tr("&File"));
-        # fileMenu.addAction(openAct);
-        # fileMenu.addSeparator();
-        # fileMenu.addAction(exitAct);
-        # menuBar().addSeparator();
+    @Slot()
+    def open(self):
+        fileName = QFileDialog.getOpenFileName(self, self.tr("Choose XML file"), QDir.currentPath(), self.tr("XML Files (*.xml)"))
+        if fileName:
+            self.treeWidget.openFile(fileName[0], True)
 
-    # findMenu = menuBar()->addMenu(tr("Find"));
-    # findMenu->addAction(findAct);
-    # findMenu->addAction(findActNext);
-    # //findMenu->addSeparator();
+    @Slot()
+    def find(self):
+        pass
 
-    # helpMenu = menuBar()->addMenu(tr("&Help"));
-    # helpMenu->addAction(aboutAct);
-    # helpMenu->addAction(aboutQtAct);
+    @Slot()
+    def findNext(self):
+        pass
 
+    @Slot()
+    def about(self):
+        QMessageBox.about(self, "About Application",
+                          "The <b>Application</b> example demonstrates how to write "
+                          "modern GUI applications using Qt, with a menu bar, "
+                          "toolbars, and a status bar.")
+
+    def create_menus(self):
+        self._file_menu = self.menuBar().addMenu("&File")
+        self._file_menu.addAction(self._open_act)
+        self._file_menu.addSeparator()
+        self._file_menu.addAction(self._exit_act)
+
+        self.menuBar().addSeparator()
+
+        self._edit_menu = self.menuBar().addMenu("&Find")
+        self._edit_menu.addAction(self._find_act)
+        self._edit_menu.addAction(self._findnext_act)
+
+        self.menuBar().addSeparator()
+
+        self._help_menu = self.menuBar().addMenu("&Help")
+        self._help_menu.addAction(self._about_act)
+        self._help_menu.addAction(self._about_qt_act)
+
+    def create_actions(self):
+
+        icon = QIcon.fromTheme(QIcon.ThemeIcon.DocumentOpen, QIcon(':/images/open.png'))
+        self._open_act = QAction( icon, "&Open...", self,
+                                 shortcut=QKeySequence.StandardKey.Open,
+                                 statusTip="Open an existing file",
+                                 triggered=self.open)
+
+        icon = QIcon.fromTheme(QIcon.ThemeIcon.EditFind, QIcon(':/images/find.png'))
+        self._find_act = QAction(icon, "&Find...", self,
+                                 shortcut=QKeySequence.StandardKey.Find,
+                                 statusTip="Find",
+                                 triggered=self.find)
+
+        icon = QIcon.fromTheme(QIcon.ThemeIcon.EditFind, QIcon(':/images/find.png'))
+        self._findnext_act = QAction(icon, "&Find next...", self,
+                                 shortcut=QKeySequence.StandardKey.FindNext,
+                                 statusTip="Find next",
+                                 triggered=self.findNext)
+
+        icon = QIcon.fromTheme(QIcon.ThemeIcon.ApplicationExit)
+        self._exit_act = QAction(icon, "E&xit", self, shortcut="Ctrl+Q",
+                                 statusTip="Exit the application", triggered=self.close)
+
+        icon = QIcon.fromTheme(QIcon.ThemeIcon.HelpAbout)
+        self._about_act = QAction(icon, "&About", self,
+                                  statusTip="Show the application's About box",
+                                  triggered=self.about)
+
+        self._about_qt_act = QAction("About &Qt", self,
+                                     statusTip="Show the Qt library's About box",
+                                     triggered=qApp.aboutQt)
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
