@@ -1,7 +1,7 @@
 from enum import Enum
 from PySide6.QtCore import QXmlStreamReader, QFile, QIODevice, Qt, Slot
-from PySide6.QtGui import QCursor
-from PySide6.QtWidgets import QTreeWidget, QWidget, QMessageBox, QTreeWidgetItem, QApplication, QPlainTextEdit, QVBoxLayout, QDialog
+from PySide6.QtGui import QCursor, QIcon
+from PySide6.QtWidgets import QStyle, QTreeWidget, QWidget, QMessageBox, QTreeWidgetItem, QApplication, QPlainTextEdit, QVBoxLayout, QDialog
 
 
 class XmlItemType(Enum):
@@ -19,6 +19,7 @@ class XmlItemType(Enum):
 #      def type(self):
 #         return self.__type   
 
+intTreeInitialLevel = 3 #initial open level
 
 class BigXmlWidget(QTreeWidget, QWidget):
 
@@ -28,6 +29,11 @@ class BigXmlWidget(QTreeWidget, QWidget):
         self.currentFile = QFile()
         self.readLevel = -1
         self.fOpenNew = True
+
+        style = QApplication.style()
+        self.icon_dirOpen = style.standardIcon(QStyle.SP_DirOpenIcon)
+        self.icon_dirClose = style.standardIcon(QStyle.SP_DirClosedIcon)
+        self.icon_file = style.standardIcon(QStyle.SP_FileIcon)
         #folderIcon = QIcon()
         #folderIcon.addPixmap( QIcon(':/images/open.png'), QIcon.Normal, QIcon.On)
         #folderIcon.addPixmap( QIcon(':/images/close.png'), QIcon.Normal, QIcon.Off)
@@ -38,6 +44,7 @@ class BigXmlWidget(QTreeWidget, QWidget):
         self.setAlternatingRowColors(True)
         
         self.itemExpanded.connect(self.expandBigXmlItem)
+        self.itemCollapsed.connect(self.handleCollapsed)
         self.itemActivated.connect(self.enterBigXmlItem)
 
 
@@ -47,7 +54,7 @@ class BigXmlWidget(QTreeWidget, QWidget):
             self.currentFile.setFileName(fileName)
             if self.currentFile.open(QIODevice.ReadOnly | QIODevice.Text):
                 self.currentFile.seek(0)
-                self.readBigXMLtoLevel(3)
+                self.readBigXMLtoLevel(intTreeInitialLevel)
                 return True
             else:
                 QMessageBox.warning(self, self.tr("BigXmlReader"),
@@ -77,18 +84,20 @@ class BigXmlWidget(QTreeWidget, QWidget):
                             itemCurrent.addChild(item)
                             itemCurrent = item
                         itemCurrent.setText(0, xml.name())    
-                        #itemCurrent.setData(0, Qt.UserRole, XmlItemType.Node)
-                        #itemCurrent.setIcon(0, folderIcon) 
+                        itemCurrent.setData(0, Qt.UserRole, XmlItemType.Node)
+                        #itemCurrent.setIcon(0, self.icon_dirOpen)
                         if level == levelDown:
                             item = QTreeWidgetItem("")
-                            #item.setData(0, Qt.UserRole, XmlItemType.Empty)
+                            item.setData(0, Qt.UserRole, XmlItemType.Empty)
                             itemCurrent.addChild(item)
+                            #itemCurrent.setIcon(0, self.icon_dirClose)
                         else:
                             for attr in xml.attributes():
                                 childItem = QTreeWidgetItem("-")
                                 childItem.setText(0, attr.name())
                                 childItem.setText(1, attr.value())
-                                #childItem.setData(0, Qt.UserRole,XmlItemType.Attribute)
+                                childItem.setData(0, Qt.UserRole,XmlItemType.Attribute)
+                                childItem.setIcon(0, self.icon_file)
                                 itemCurrent.addChild(childItem)
             
                 case QXmlStreamReader.EndElement:
@@ -102,14 +111,20 @@ class BigXmlWidget(QTreeWidget, QWidget):
                         #itemCurrent.setData(1, Qt.UserRole,XmlItemType.Comment)
                         #itemCurrent.setIcon(0, bookmarkIcon)
                         #itemCurrent.takeChildren().clear()
-
+        
+        self.expandToDepth(intTreeInitialLevel-2)
         self.resizeColumnToContents(0)
-        self.resizeColumnToContents(1)
         QApplication.restoreOverrideCursor()
         return not xml.error()
     
     @Slot()
+    def handleCollapsed(self, item):
+        #item.setIcon(0, self.icon_dirClose)
+        pass
+
+    @Slot()
     def expandBigXmlItem(self, itemBegin:  QTreeWidgetItem):
+        #itemBegin.setIcon(0, self.icon_dirOpen)
         pass
         #BigXmlItem* item = static_cast<BigXmlItem*>(itemBegin);
         if itemBegin:

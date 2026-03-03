@@ -41,10 +41,8 @@ class MainWindow(QMainWindow):
 
     @Slot()
     def about(self):
-        QMessageBox.about(self, "About Application",
-                          "The <b>Application</b> example demonstrates how to write "
-                          "modern GUI applications using Qt, with a menu bar, "
-                          "toolbars, and a status bar.")
+        QMessageBox.about(self, self.tr("About BigXmlReader"),
+                          self.tr("The <b>BigXmlReader</b> example demonstrates how to quick read big xml file. E-mail: sikuda@yandex.ru"))
 
     def create_menus(self):
         self._file_menu = self.menuBar().addMenu("&File")
@@ -67,34 +65,38 @@ class MainWindow(QMainWindow):
     def create_actions(self):
 
         icon = QIcon.fromTheme(QIcon.ThemeIcon.DocumentOpen, QIcon(':/images/open.png'))
-        self._open_act = QAction( icon, "&Open...", self,
+        self._open_act = QAction( icon, self.tr("&Open..."), self,
                                  shortcut=QKeySequence.StandardKey.Open,
-                                 statusTip="Open an existing file",
+                                 statusTip=self.tr("Open an existing file"),
                                  triggered=self.open)
+        
+        icon = QIcon.fromTheme(QIcon.ThemeIcon.ApplicationExit)
+        self._exit_act = QAction(icon, self.tr("E&xit"), self, shortcut="Ctrl+Q",
+                                 statusTip=self.tr("Exit the application"), triggered=self.close)
+
+        #---------------------------------------------------------
 
         icon = QIcon.fromTheme(QIcon.ThemeIcon.EditFind, QIcon(':/images/find.png'))
-        self._find_act = QAction(icon, "&Find...", self,
+        self._find_act = QAction(icon, self.tr("&Find..."), self,
                                  shortcut=QKeySequence.StandardKey.Find,
-                                 statusTip="Find",
+                                 statusTip=self.tr("Find"),
                                  triggered=self.find)
 
         icon = QIcon.fromTheme(QIcon.ThemeIcon.EditFind, QIcon(':/images/find.png'))
-        self._findnext_act = QAction(icon, "&Find next...", self,
+        self._findnext_act = QAction(icon, self.tr("&Find next..."), self,
                                  shortcut=QKeySequence.StandardKey.FindNext,
-                                 statusTip="Find next",
+                                 statusTip=self.tr("Find next"),
                                  triggered=self.findNext)
 
-        icon = QIcon.fromTheme(QIcon.ThemeIcon.ApplicationExit)
-        self._exit_act = QAction(icon, "E&xit", self, shortcut="Ctrl+Q",
-                                 statusTip="Exit the application", triggered=self.close)
+        #----------------------------------------------------------
 
         icon = QIcon.fromTheme(QIcon.ThemeIcon.HelpAbout)
-        self._about_act = QAction(icon, "&About", self,
-                                  statusTip="Show the application's About box",
+        self._about_act = QAction(icon, self.tr("&About"), self,
+                                  statusTip=self.tr("Show the application's About box"),
                                   triggered=self.about)
 
-        self._about_qt_act = QAction("About &Qt", self,
-                                     statusTip="Show the Qt library's About box",
+        self._about_qt_act = QAction(self.tr("About &Qt"), self,
+                                     statusTip=self.tr("Show the Qt library's About box"),
                                      triggered=qApp.aboutQt)
 
 if __name__ == '__main__':
