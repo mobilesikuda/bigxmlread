@@ -1,6 +1,6 @@
 from enum import Enum
 from PySide6.QtCore import QXmlStreamReader, QFile, QIODevice, Qt, Slot
-from PySide6.QtGui import QCursor, QIcon
+from PySide6.QtGui import QCursor, QFont, QIcon
 from PySide6.QtWidgets import QStyle, QTreeWidget, QWidget, QMessageBox, QTreeWidgetItem, QApplication, QPlainTextEdit, QVBoxLayout, QDialog
 
 
@@ -29,6 +29,8 @@ class BigXmlWidget(QTreeWidget, QWidget):
         self.currentFile = QFile()
         self.readLevel = -1
         self.fOpenNew = True
+        font = QFont("Arial", 10) # Шрифт и размер
+        self.setFont(font)
 
         style = QApplication.style()
         self.icon_dirOpen = style.standardIcon(QStyle.SP_DirOpenIcon)
@@ -125,8 +127,9 @@ class BigXmlWidget(QTreeWidget, QWidget):
     @Slot()
     def expandBigXmlItem(self, itemBegin:  QTreeWidgetItem):
         #itemBegin.setIcon(0, self.icon_dirOpen)
-        pass
+        #pass
         #BigXmlItem* item = static_cast<BigXmlItem*>(itemBegin);
+        #indexFromItem(QTreeWidgetItem item)
         if itemBegin:
             #QApplication.setOverrideCursor(QCursor(Qt.WaitCursor))
             if itemBegin.childCount() == 1:
